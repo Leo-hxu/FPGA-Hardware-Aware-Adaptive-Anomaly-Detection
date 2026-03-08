@@ -32,7 +32,7 @@ Where `system_state` monitoring may include:
 ## 4. System Architecture (End Goal)
 
 **Complete Pipeline:**
-`Sensor board ¡ú FPGA acquisition ¡ú feature extraction ¡ú neural inference ¡ú adaptive threshold ¡ú decision`
+`Sensor board -> FPGA acquisition -> feature extraction -> neural inference -> adaptive threshold -> decision`
 
 **Target Hardware Components:**
 * **Custom sensing board:** Current/power sensing front-end, digital interface to FPGA.
@@ -78,7 +78,7 @@ The scripts generate metrics comparing the **Adaptive Threshold** vs. **Fixed Th
 ## 6. Expected Contributions & Outcome
 * **Hardware-aware anomaly decision mechanism:** Re-thinking inference under constrained compute.
 * **Real-time bounded-latency inference pipeline:** Guaranteeing max response limits.
-* **Empirical evaluation of latency¨Caccuracy trade-offs:** Validated first via this Python baseline model.
+* **Empirical evaluation of latencyÂ¨Caccuracy trade-offs:** Validated first via this Python baseline model.
 * **End-to-end FPGA prototype:** With physical sensing interfaces (Target Outcome).
 
 The final objective is a working real-time hardware prototype and experimental results suitable for submission to an FPGA / embedded systems venue.
