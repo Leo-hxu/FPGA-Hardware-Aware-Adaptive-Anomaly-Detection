@@ -278,7 +278,7 @@ Next technical milestone:
 
 - Implement the adaptive controller on FPGA and compare static versus adaptive modes using latency, power, and classification metrics
 
-## Resume-Style Summary
+## Summary
 
 If you are reviewing this project from a portfolio perspective, the core contribution is:
 
