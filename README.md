@@ -1,6 +1,6 @@
-# A Runtime-Adaptive FPGA Anomaly Detector for DC Fan Current Waveforms with Power Telemetry
+# A Runtime-Adaptive FPGA Anomaly Detector for Low-Voltage BLDC Cooling Module Current Waveforms with Power Telemetry
 
-This repository is the software reference implementation for a low-cost FPGA anomaly detection project that monitors 5V DC fan current waveforms and adapts its runtime behavior based on system stress.
+This repository is the software reference implementation for a low-cost FPGA anomaly detection project that monitors low-voltage BLDC cooling module current waveforms and adapts its runtime behavior based on system stress.
 
 The end goal is an FPGA + sensing-board system that performs streaming anomaly detection in real time. The current repository focuses on the software pipeline: data preparation, sliding-window feature extraction, tiny-MLP training, and export of floating-point and fixed-point model parameters for deployment.
 
@@ -8,7 +8,7 @@ The end goal is an FPGA + sensing-board system that performs streaming anomaly d
 
 This project is designed to demonstrate the kind of work I want to do in FPGA, embedded AI, and hardware-software co-design roles.
 
-In this repository, I built a compact anomaly detection pipeline for DC fan current waveforms, organized the dataset by physical fault scenario, engineered a lightweight 8-feature representation, trained a deployable tiny MLP, and exported both floating-point and fixed-point model parameters for future FPGA inference.
+In this repository, I built a compact anomaly detection pipeline for low-voltage BLDC cooling module current waveforms, organized the dataset by physical fault scenario, engineered a lightweight 8-feature representation, trained a deployable tiny MLP, and exported both floating-point and fixed-point model parameters for future FPGA inference.
 
 If you are reviewing this project as a recruiter, hiring manager, or interviewer, the main value is not just the classifier itself. The value is that the project is framed around deployment constraints: latency, power awareness, model simplicity, fixed-point export, and a realistic path from Python reference model to FPGA implementation.
 
@@ -56,11 +56,11 @@ The intended adaptive signals are queue depth and power telemetry. The intended 
 
 Title:
 
-**A Runtime-Adaptive FPGA Anomaly Detector for DC Fan Current Waveforms with Power Telemetry**
+**A Runtime-Adaptive FPGA Anomaly Detector for Low-Voltage BLDC Cooling Module Current Waveforms with Power Telemetry**
 
 In one sentence:
 
-We monitor the current waveform of a 5V DC fan, detect abnormal behavior with an 8 -> 8 -> 1 tiny MLP, and target an FPGA runtime controller that switches feature complexity and decision threshold according to queue depth and power telemetry.
+We monitor the current waveform of a low-voltage BLDC cooling module, detect abnormal behavior with an 8 -> 8 -> 1 tiny MLP, and target an FPGA runtime controller that switches feature complexity and decision threshold according to queue depth and power telemetry.
 
 ## Target System
 
@@ -73,7 +73,7 @@ Physical anomalies of interest include:
 
 Target hardware pipeline:
 
-`DC fan -> current/power sensor -> FPGA acquisition -> window buffer -> feature extractor -> tiny MLP -> adaptive controller -> anomaly decision`
+`BLDC cooling module -> current/power sensor -> FPGA acquisition -> window buffer -> feature extractor -> tiny MLP -> adaptive controller -> anomaly decision`
 
 Planned hardware context:
 
@@ -271,7 +271,7 @@ Current status:
 - Software training pipeline: implemented
 - Feature extraction baseline: implemented
 - Fixed-point export flow: implemented
-- Dataset organization for fan-current anomaly scenarios: implemented
+- Dataset organization for BLDC current anomaly scenarios: implemented
 - FPGA runtime-adaptive deployment: target next stage
 
 Next technical milestone:
@@ -282,8 +282,8 @@ Next technical milestone:
 
 If you are reviewing this project from a portfolio perspective, the core contribution is:
 
-> Built a deployment-oriented anomaly detection pipeline for DC fan current waveforms, including sliding-window feature extraction, 8-feature tiny-MLP training, and fixed-point model export for future FPGA inference. The project is designed around runtime adaptation using queue depth and power telemetry to improve the accuracy-latency-energy tradeoff under changing system load.
+> Built a deployment-oriented anomaly detection pipeline for low-voltage BLDC cooling module current waveforms, including sliding-window feature extraction, 8-feature tiny-MLP training, and fixed-point model export for future FPGA inference. The project is designed around runtime adaptation using queue depth and power telemetry to improve the accuracy-latency-energy tradeoff under changing system load.
 
 Short version suitable for a resume bullet:
 
-> Developed a hardware-oriented anomaly detection pipeline for DC fan current waveforms, including time-series feature extraction, tiny-MLP training, and fixed-point model export for FPGA deployment.
+> Developed a hardware-oriented anomaly detection pipeline for low-voltage BLDC cooling module current waveforms, including time-series feature extraction, tiny-MLP training, and fixed-point model export for FPGA deployment.
