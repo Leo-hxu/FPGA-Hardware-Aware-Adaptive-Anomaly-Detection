@@ -1,84 +1,227 @@
-# FPGA Hardware-Aware Adaptive Anomaly Detection
+# A Runtime-Adaptive FPGA Anomaly Detector for DC Fan Current Waveforms with Power Telemetry
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Status: Prototype](https://img.shields.io/badge/Status-Prototype-Success.svg)](#)
+This repository is the software reference implementation for a low-cost FPGA anomaly detection project that monitors 5V DC fan current waveforms and adapts its runtime behavior based on system stress.
 
-> **Note:** This repository currently contains the **Software Baseline & Golden Reference Model** (Python) for evaluating the algorithmic and systemic benefits of the adaptive thresholding technique before hardware deployment on FPGA.
+The end goal is an FPGA + sensing-board system that performs streaming anomaly detection in real time. The current repository focuses on the software pipeline: data preparation, sliding-window feature extraction, tiny-MLP training, and export of floating-point and fixed-point model parameters for deployment.
 
-## 1. Motivation
-Real-time anomaly detection systems deployed on embedded or FPGA platforms must balance detection sensitivity and computational latency. However, most existing approaches assume fixed decision thresholds independent of hardware resource conditions. In practice, system load fluctuates, and static thresholds can lead to unstable latency or unnecessary computation.
+## Project Motivation
 
-This project turns anomaly detection from a static algorithm into a system-aware decision process that adapts to real-time hardware conditions.
+Real-time anomaly detection on embedded and FPGA platforms is constrained by three competing requirements:
 
-## 2. Problem Statement
-We investigate how anomaly detection systems can maintain bounded inference latency under resource constraints while preserving detection accuracy.
+- Detection quality must remain useful under changing operating conditions.
+- Tail latency must stay bounded when workload increases.
+- Power and hardware cost must remain practical for a small system.
 
-**Core Question:** *How can anomaly decision policies adapt to real-time hardware state to stabilize runtime behavior?*
+Most anomaly detectors assume a static decision threshold. In practice, queue depth, compute pressure, and power telemetry vary over time. A fixed policy is therefore a poor fit for a real deployment.
 
-## 3. Proposed Idea
-We propose a hardware-aware anomaly detection framework in which the decision threshold dynamically adjusts according to system load.
+This project studies a more deployment-oriented alternative:
 
-Instead of a static threshold (**`score > T`**), we utilize a dynamic, state-dependent threshold:
-<div align="center">
-  <b><code>score > f(system_state)</code></b>
-</div>
+`score > f(system_state)`
 
-Where `system_state` monitoring may include:
-* Inference queue depth (primarily evaluated in this software baseline)
-* Compute utilization
-* Power level
+instead of a fixed rule such as:
 
-## 4. System Architecture (End Goal)
+`score > T`
 
-**Complete Pipeline:**
-`Sensor board -> FPGA acquisition -> feature extraction -> neural inference -> adaptive threshold -> decision`
+The intended adaptive signals are queue depth and power telemetry. The intended adaptive actions are feature-mode switching and threshold switching.
 
-**Target Hardware Components:**
-* **Custom sensing board:** Current/power sensing front-end, digital interface to FPGA.
-* **FPGA Modules:** 
-    * Data acquisition controller
-    * Lightweight neural network inference core
-    * System load monitor
-    * Adaptive threshold controller
+## Final Project Definition
 
-## 5. Software Baseline & Results
+Title:
 
-The current Python code simulates queue load and evaluates the latency-accuracy trade-offs between fixed threshold detection and our proposed adaptive threshold detection under stress tests.
+**A Runtime-Adaptive FPGA Anomaly Detector for DC Fan Current Waveforms with Power Telemetry**
 
-### 5.1 Installation & Run
+In one sentence:
 
-```powershell
-# 1) Create / use virtual environment
-python -m venv .venv
-& .\.venv\Scripts\Activate.ps1
+We monitor the current waveform of a 5V DC fan, detect abnormal behavior with an 8 -> 8 -> 1 tiny MLP, and target an FPGA runtime controller that switches feature complexity and decision threshold according to queue depth and power telemetry.
 
-# 2) Install dependencies
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+## Target System
 
-# 3) Run baseline experiment
-python baseline_adaptive_nn.py
+Physical anomalies of interest include:
+
+- Normal spinning
+- Partial blockage or friction increase
+- Startup and stop transients
+- Power disturbance events
+
+Target hardware pipeline:
+
+`DC fan -> current/power sensor -> FPGA acquisition -> window buffer -> feature extractor -> tiny MLP -> adaptive controller -> anomaly decision`
+
+Planned hardware context:
+
+- Main platform: DE10-Lite
+- Sensor front-end: INA219-based current and power telemetry
+- Deployment style: streaming inference with lightweight features and fixed-point weights
+
+## Current Repository Scope
+
+This repository contains the software side of the project, not the final FPGA RTL implementation.
+
+What is already implemented:
+
+- Sliding-window segmentation with `window_size = 32` and `stride = 16`
+- Eight handcrafted features for each window
+- Binary anomaly classification with a tiny MLP
+- Model export to floating-point JSON
+- Fixed-point export for FPGA-oriented inference
+- Synthetic and captured waveform datasets organized by scenario
+
+What this repository is for:
+
+- Golden-model development
+- Model bring-up and training
+- Feature validation
+- Fixed-point handoff preparation for FPGA deployment
+
+## Feature Set
+
+Each window is converted into 8 low-cost features:
+
+1. Mean current
+2. Max current
+3. Min current
+4. Peak-to-peak amplitude
+5. Mean absolute difference
+6. Window energy
+7. Variance
+8. Slope or trend
+
+These were chosen because they are cheap to compute, interpretable, and realistic for an FPGA feature extractor.
+
+## Model
+
+The classifier is intentionally small:
+
+- Input: 8
+- Hidden: 8 with ReLU
+- Output: 1 logit
+
+Architecture:
+
+`8 -> 8 -> 1`
+
+This keeps the model easy to train in software and practical to map into fixed-point FPGA inference.
+
+## Adaptive Runtime Idea
+
+The final hardware-oriented design uses two adaptive knobs:
+
+1. Threshold adaptation
+
+- Low stress: `T_low`
+- Medium stress: `T_mid`
+- High stress: `T_high`
+
+2. Feature-mode adaptation
+
+- Lite mode: a reduced feature subset for lower runtime cost
+- Rich mode: the full 8-feature path for better detection quality
+
+The software code in this repository mainly establishes the feature and model baseline needed before that runtime controller is moved into hardware.
+
+## Repository Structure
+
+```text
+data/
+  normal_*.csv
+  blocked_*.csv
+  startup_*.csv
+  disturb_*.csv
+
+export/
+  tiny_mlp_export.json
+  tiny_mlp_fixed.json
+
+src/
+  feature_utils.py
+  generate_synthetic_data.py
+  train_tiny_mlp.py
+  export_fixed_model.py
 ```
 
-### 5.2 Baseline Experimental Results
+## Quick Start
 
-The scripts generate metrics comparing the **Adaptive Threshold** vs. **Fixed Threshold** under various simulated queue load conditions. 
+Create an environment and install dependencies:
 
-**(1) P99 Latency Control**  
-*The adaptive method effectively bounds the worst-case (P99) latency under high load spikes.*
+```powershell
+python -m venv .venv
+& .\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
 
-![P99 Latency](p99_latency.png)
+Generate synthetic data if needed:
 
-**(2) Detection Accuracy Trade-off**  
-*Achieves strict latency bounds with graceful and controlled degradation in accuracy.*
+```powershell
+python src/generate_synthetic_data.py
+```
 
-![Accuracy](accuracy.png)
+Train the tiny MLP and export the floating-point model:
 
-## 6. Expected Contributions & Outcome
-* **Hardware-aware anomaly decision mechanism:** Re-thinking inference under constrained compute.
-* **Real-time bounded-latency inference pipeline:** Guaranteeing max response limits.
-* **Empirical evaluation of latency¨Caccuracy trade-offs:** Validated first via this Python baseline model.
-* **End-to-end FPGA prototype:** With physical sensing interfaces (Target Outcome).
+```powershell
+python src/train_tiny_mlp.py
+```
 
-The final objective is a working real-time hardware prototype and experimental results suitable for submission to an FPGA / embedded systems venue.
+Export the model to fixed-point JSON for FPGA-oriented deployment:
+
+```powershell
+python src/export_fixed_model.py
+```
+
+## Outputs
+
+Training produces:
+
+- Classification metrics on the held-out test split
+- `export/tiny_mlp_export.json`
+- `export/tiny_mlp_fixed.json`
+
+The fixed-point export is intended to support a future FPGA inference block.
+
+## Baselines and Evaluation Direction
+
+The broader project compares static and adaptive operating modes:
+
+- Static-Lite
+- Static-Rich
+- Adaptive-Threshold Only
+- Adaptive-Feature + Adaptive-Threshold
+
+The full project evaluation is intended to report:
+
+- Accuracy
+- Precision
+- Recall
+- F1-score
+- Average latency
+- P95 and P99 latency
+- Power or energy per window
+- FPGA resource usage such as LUT, FF, BRAM, DSP, and Fmax
+
+## Why This Project Is Interesting
+
+This is not just another anomaly classifier. The interesting part is the system view: the detector is meant to respond to runtime pressure instead of pretending that hardware conditions are static.
+
+That makes the project relevant to:
+
+- FPGA deployment
+- embedded ML
+- real-time systems
+- architecture-aware inference
+- low-cost sensing and hardware-software co-design
+
+## Status
+
+Current status:
+
+- Software training pipeline: implemented
+- Feature extraction baseline: implemented
+- Fixed-point export flow: implemented
+- Dataset organization for fan-current anomaly scenarios: implemented
+- FPGA runtime-adaptive deployment: target next stage
+
+## Resume-Style Summary
+
+If you are reviewing this project from a portfolio perspective, the core contribution is:
+
+> Built a deployment-oriented anomaly detection pipeline for DC fan current waveforms, including sliding-window feature extraction, 8-feature tiny-MLP training, and fixed-point model export for future FPGA inference. The project is designed around runtime adaptation using queue depth and power telemetry to improve the accuracy-latency-energy tradeoff under changing system load.
