@@ -4,6 +4,34 @@ This repository is the software reference implementation for a low-cost FPGA ano
 
 The end goal is an FPGA + sensing-board system that performs streaming anomaly detection in real time. The current repository focuses on the software pipeline: data preparation, sliding-window feature extraction, tiny-MLP training, and export of floating-point and fixed-point model parameters for deployment.
 
+## Portfolio Summary
+
+This project is designed to demonstrate the kind of work I want to do in FPGA, embedded AI, and hardware-software co-design roles.
+
+In this repository, I built a compact anomaly detection pipeline for DC fan current waveforms, organized the dataset by physical fault scenario, engineered a lightweight 8-feature representation, trained a deployable tiny MLP, and exported both floating-point and fixed-point model parameters for future FPGA inference.
+
+If you are reviewing this project as a recruiter, hiring manager, or interviewer, the main value is not just the classifier itself. The value is that the project is framed around deployment constraints: latency, power awareness, model simplicity, fixed-point export, and a realistic path from Python reference model to FPGA implementation.
+
+## What This Project Demonstrates
+
+- End-to-end ML pipeline design for a hardware-oriented use case
+- Time-series feature engineering for anomaly detection
+- Practical model sizing for resource-constrained deployment
+- Fixed-point preparation for FPGA inference
+- System-level thinking about latency, power, and runtime adaptation
+- Clear decomposition from sensing pipeline to deployable inference stages
+
+## Skills Demonstrated
+
+- Python
+- NumPy and pandas
+- scikit-learn preprocessing and evaluation
+- PyTorch model training
+- Time-series windowing and feature extraction
+- Fixed-point quantization workflow
+- Embedded and FPGA deployment thinking
+- Hardware-software co-design documentation
+
 ## Project Motivation
 
 Real-time anomaly detection on embedded and FPGA platforms is constrained by three competing requirements:
@@ -72,6 +100,20 @@ What this repository is for:
 - Model bring-up and training
 - Feature validation
 - Fixed-point handoff preparation for FPGA deployment
+
+## My Contribution
+
+The repository is structured to show a clean engineering path from raw waveform data to deployable model artifacts.
+
+Concretely, I implemented:
+
+- Scenario-based dataset organization for normal, blocked, startup, and disturbance waveforms
+- A reusable sliding-window and feature extraction utility layer
+- A complete training script for the 8 -> 8 -> 1 tiny MLP baseline
+- Export of trained parameters to JSON for software and hardware handoff
+- A fixed-point conversion flow suitable for later FPGA integration
+
+This is intentionally a small-model project with a strong deployment story rather than a large-model benchmark project.
 
 ## Feature Set
 
@@ -178,6 +220,18 @@ Training produces:
 
 The fixed-point export is intended to support a future FPGA inference block.
 
+## Why This Is Resume-Relevant
+
+This project is relevant to roles in:
+
+- FPGA and digital design
+- embedded systems
+- edge AI or tiny ML
+- hardware acceleration
+- architecture and systems research
+
+The strongest portfolio signal here is that the work connects model design to deployment constraints. Instead of optimizing only for offline accuracy, the project is built around a realistic engineering tradeoff: maintain usable anomaly detection while preparing for bounded latency and low-cost hardware execution.
+
 ## Baselines and Evaluation Direction
 
 The broader project compares static and adaptive operating modes:
@@ -220,8 +274,16 @@ Current status:
 - Dataset organization for fan-current anomaly scenarios: implemented
 - FPGA runtime-adaptive deployment: target next stage
 
+Next technical milestone:
+
+- Implement the adaptive controller on FPGA and compare static versus adaptive modes using latency, power, and classification metrics
+
 ## Resume-Style Summary
 
 If you are reviewing this project from a portfolio perspective, the core contribution is:
 
 > Built a deployment-oriented anomaly detection pipeline for DC fan current waveforms, including sliding-window feature extraction, 8-feature tiny-MLP training, and fixed-point model export for future FPGA inference. The project is designed around runtime adaptation using queue depth and power telemetry to improve the accuracy-latency-energy tradeoff under changing system load.
+
+Short version suitable for a resume bullet:
+
+> Developed a hardware-oriented anomaly detection pipeline for DC fan current waveforms, including time-series feature extraction, tiny-MLP training, and fixed-point model export for FPGA deployment.
